@@ -62,12 +62,12 @@ class NewsModel(dict):
         if "tag" in conditionDict and conditionDict["tag"].__len__() > 0:
             if "and" in conditionDict["tag"] and conditionDict["tag"]["and"].__len__() > 0:
                 for tag in conditionDict["tag"]["and"]:
-                    tagCondition["$and"].append({"tag": {"$regex": tag}})
+                    tagCondition["$and"].append({"tag": tag})
             if "or" in conditionDict["tag"] and conditionDict["tag"]["or"].__len__() > 0:
                 for tags in conditionDict["tag"]["or"]:
                     tagOr = {"$or": []}
                     for tag in tags:
-                        tagOr["$or"].append({"tag": {"$regex": tag}})
+                        tagOr["$or"].append({"tag": tag})
                     tagCondition["$and"].append(tagOr)
             titleAndTag["$or"].append(tagCondition)
         if "tag" in conditionDict or "title"  in conditionDict:
