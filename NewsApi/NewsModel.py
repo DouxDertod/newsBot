@@ -39,6 +39,41 @@ class NewsModel(dict):
     def findByConditon(self,conditionDict):
 
         queryDict = {"$and": []}
+        # deal with  title and tag
+        #    title part
+        titleAndTag = {"$or":[]}
+        titleCondition ={"$and": []}
+        if "title"  in conditionDict and conditionDict["title"].__len__()>0:
+            if "and" in conditionDict["title"] and conditionDict["title"]["and"].__len__()>0:
+                for title in  conditionDict["title"]["and"]:
+                    titleCondition["$and"].append({"title":{"$regex": title}})
+            if "or" in conditionDict["title"] and conditionDict["title"]["or"].__len__()>0:
+                for titles in  conditionDict["title"]["or"]:
+                    titleOr = {"$or": []}
+                    for title in titles:
+                        titleOr["$or"].append({"title":{"$regex": title}})
+                    titleCondition["$and"].append(titleOr)
+            titleAndTag["$or"].append(titleCondition)
+
+
+        #    title part
+
+        tagCondition = {"$and": []}
+        if "tag" in conditionDict and conditionDict["tag"].__len__() > 0:
+            if "and" in conditionDict["tag"] and conditionDict["tag"]["and"].__len__() > 0:
+                for tag in conditionDict["tag"]["and"]:
+                    tagCondition["$and"].append({"tag": {"$regex": tag}})
+            if "or" in conditionDict["tag"] and conditionDict["tag"]["or"].__len__() > 0:
+                for tags in conditionDict["tag"]["or"]:
+                    tagOr = {"$or": []}
+                    for tag in tags:
+                        tagOr["$or"].append({"tag": {"$regex": tag}})
+                    tagCondition["$and"].append(tagOr)
+            titleAndTag["$or"].append(tagCondition)
+        if "tag" in conditionDict or "tag"  in conditionDict:
+            queryDict["$and"].append(titleAndTag)
+        # end dealing tag and  tag
+            
         if "keyword" in conditionDict and conditionDict["keyword"].__len__()>0:
             if  "logic" not in conditionDict:
                 return "Require logic"
@@ -75,16 +110,32 @@ class NewsModel(dict):
                         return "Invalid method"
             else:
                 return "Invalid logic"
+
+        startTime=None
+        endTime=None
         try:
             if "start_time"  in conditionDict and conditionDict["start_time"]!="":
-                queryDict["$and"].append({"publish_time":{"$gt":helper.string2Datetime(conditionDict["start_time"])}})
+                startTime=helper.string2Datetime(conditionDict["start_time"])
         except:
             return "Invalid start time"
         try:
             if "end_time"  in conditionDict and conditionDict["end_time"]!="":
-                queryDict["$and"].append({"publish_time":{"$lt":helper.string2Datetime(conditionDict["end_time"])}})
+                endTime = helper.string2Datetime(conditionDict["end_time"])
+
         except:
             return "Invalid end time"
+        if startTime is not None and endTime is not None and startTime> endTime:
+            timeOr={"$or":[]}
+            timeOr["$or"].append({"publish_time": {"$gt":startTime}})
+            timeOr["$or"].append({"publish_time": {"$lt":endTime}})
+            queryDict["$and"].append(timeOr)
+        else:
+            if startTime is not None:
+                queryDict["$and"].append({"publish_time": {"$gt":startTime}})
+            if endTime is not None:
+                queryDict["$and"].append({"publish_time": {"$lt":endTime}})
+
+
         if "exclude_keyword"  in conditionDict  and conditionDict["exclude_keyword"].__len__()>0:
             if "method" not in conditionDict:
                 return "Require method"
@@ -116,7 +167,7 @@ class NewsModel(dict):
         if "page" in conditionDict:
             skip=conditionDict["page"]*limit
         result=[]
-        print(json.dumps(queryDict))
+
         cursor=self.collection.find(queryDict).skip(skip).limit(limit)
         if "sort_name" in conditionDict:
             if "sort_order" in conditionDict and conditionDict["sort_order"]=="ASC":
