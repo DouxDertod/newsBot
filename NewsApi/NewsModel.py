@@ -70,7 +70,7 @@ class NewsModel(dict):
                         tagOr["$or"].append({"tag": {"$regex": tag}})
                     tagCondition["$and"].append(tagOr)
             titleAndTag["$or"].append(tagCondition)
-        if "tag" in conditionDict or "tag"  in conditionDict:
+        if "tag" in conditionDict or "title"  in conditionDict:
             queryDict["$and"].append(titleAndTag)
         # end dealing tag and  tag
             
