@@ -69,7 +69,7 @@ def saveServralNews(category):
                 result = helper.count_from_str(newsContent)
                 tags = []
                 for k, v in result:
-                    if v >= 3:
+                    if v >= 5:
                         tags.append(k)
 
 
@@ -104,7 +104,7 @@ def saveServralNews(category):
     except Exception as ex:
         errorMessage=datetime.datetime.now().strftime("%m/%d/%Y %H:%M:%S ")
         errorMessage+= category+"-No."+str(count)
-        errorMessage+=" error:"+ex.message
+        #errorMessage+=" error:"+ex.message
         print(errorMessage)
         if not os.path.exists("tempfile"):
             os.makedirs("tempfile")
@@ -112,6 +112,3 @@ def saveServralNews(category):
         f.write(errorMessage)
         f.close()
 
-
-updateCategoryFile()
-saveNewsEachCategory()

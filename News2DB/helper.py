@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import codecs
+import json
 
 import time
 import random
@@ -7,6 +8,10 @@ import datetime
 from collections import Counter
 import jieba.analyse
 import jieba
+import os
+import requests
+url_GetStopWords = "https://account-center-test.chewrobot.com/api/v1/news/words/invalids"
+
 def generateId():
     now_time = datetime.datetime.now()
     timestamp = time.mktime(now_time.timetuple())
@@ -59,3 +64,16 @@ def count_from_str(content, top_limit=0):
                 counter[word] += 1
 
     return counter.most_common(top_limit)
+
+def updateStopWordsFile():
+    StopWords =   json.loads( getStopWords())
+    f = codecs.open( 'stop.txt', "w", "utf-8")
+    for StopWord in StopWords:
+        f.write(StopWord+"\n")
+    f.close()
+
+def getStopWords():
+
+    response = requests.get(url_GetStopWords)
+    return response.json()["payload"]
+
