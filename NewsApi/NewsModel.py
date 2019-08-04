@@ -3,7 +3,7 @@ import re
 from pymongo import MongoClient
 import json
 from bson import ObjectId
-
+import datetime
 import helper
 
 
@@ -29,6 +29,28 @@ class NewsModel(dict):
         if self._id:
             self.collection.remove({"_id": ObjectId(self._id)})
             self.clear()
+
+    #get summaris in 24h
+    def getSummaries(self):
+
+        queryDict = {"$and": []}
+        endTime = datetime.datetime.now()
+        startTime = endTime+datetime.timedelta(hours=-24)
+        queryDict["$and"].append({"publish_time": {"$gt":startTime}})
+        queryDict["$and"].append({"publish_time": {"$lt": endTime}})
+
+        cursor = self.collection.find(queryDict)
+        result = []
+        for record in cursor:
+            try:
+                if "summary" in record and record["summary"].__len__() > 0:
+                    result.append( record["summary"])
+            except:
+                continue
+
+        return result
+
+
 
     def findByTitle(self):
         if self.title and self.publish_time:
@@ -199,3 +221,4 @@ class NewsDocument(NewsModel):
     @property
     def keywords(self):
         return self.title.split()
+

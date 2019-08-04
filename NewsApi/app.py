@@ -11,7 +11,7 @@ app = Flask(__name__)
 #     return "Flask App!"
 
 @app.route("/news/query",methods = ['POST'])
-def hello():
+def query():
     # test ={
     #     "keyword":["飞机","炸弹"],
     #     "start_date":None,
@@ -39,6 +39,14 @@ def hello():
     
 
     return  json_resp({'retcode': 0, 'msg': "success", 'data': resultlist})
+
+
+@app.route("/news/summary", methods=['get'])
+def get24hSummary():
+    nm = NewsModel.NewsDocument()
+    resultlist = nm.getSummaries()
+    return json_resp({'retcode': 0, 'msg': "success", 'data': resultlist})
+
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=18088)
