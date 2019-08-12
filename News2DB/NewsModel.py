@@ -31,8 +31,8 @@ class NewsModel(dict):
             self.clear()
 
     def findByTitle(self):
-        if self.title and self.author:
-            return self.collection.find_one({"title":self.title,"author":self.author})
+        if self.title and self.channel:
+            return self.collection.find_one({"title":self.title,"channel":self.channel})
         else:
             return "notitle"
 
